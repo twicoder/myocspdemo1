@@ -1,0 +1,31 @@
+{
+  "filter_expr": "relation = '0' AND offer_id IN ('') ",
+  "status": 0,
+  "STREAM_EVENT_CEP": {},
+  "description": "CRM实时订购关系：4G飞享58全国套餐额外赠送180分钟本地主叫",
+  "name": "CRM实时订购关系",
+  "owner": "ocdp",
+  "streamid": "13",
+  "p_event_id": 0,
+  "output": {
+    "datasource_id": 1,
+    "topic": "CEP_MCD_INST_RESULT_NEW",
+    "interval": 60,
+    "subscribe": {
+      "time": [],
+      "period": "always"
+    },
+    "datainterface_id": 1,
+    "prefix": "prefix1",
+    "delim": ","
+  },
+  "uniqKeys": "product_no",
+  "eventid": 729,
+  "props": [
+    {
+      "pname": "ocsp.event.append-id.enable",
+      "pvalue": "true"
+    }
+  ],
+  "select_expr": "product_no,relation,offer_id"
+}

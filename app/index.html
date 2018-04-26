@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html lang="en" ng-app="myApp" class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html lang="en" ng-app="myApp" class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html lang="en" ng-app="myApp" class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html lang="en" ng-app="myApp" class="no-js"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>My AngularJS App</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/nf-users-all.css">
+  <link rel="stylesheet" href="css/nf-templates-all.css">
+  <link rel="stylesheet" href="css/nf-summary-all.css">
+  <link rel="stylesheet" href="css/nf-provenance-all.css">
+  <link rel="stylesheet" href="css/nf-history-all.css">
+  <link rel="stylesheet" href="css/nf-counters-all.css">
+  <link rel="stylesheet" href="css/nf-cluster-all.css">
+  <link rel="stylesheet" href="css/nf-canvas-all.css">
+  <link rel="stylesheet" href="css/nf-bulletin-board-all.css">
+  <link rel="stylesheet" href="css/message-pane.css">
+  <link rel="stylesheet" href="css/message-page.css">
+
+
+  <link rel="stylesheet" href="bower_components/html5-boilerplate/dist/css/normalize.css">
+  <link rel="stylesheet" href="bower_components/html5-boilerplate/dist/css/main.css">
+  <link rel="stylesheet" href="app.css">
+
+
+
+  <script src="bower_components/html5-boilerplate/dist/js/vendor/modernizr-2.8.3.min.js"></script>
+  <script src="bower_components/jquery/dist/jquery.js"></script>
+  <script src="bower_components/jquery-ui/jquery-ui.js"></script>
+  <script src="bower_components/d3/d3.js"></script>
+  <script src="myjs/ocsp-space.js"></script>
+  <script src="myjs/ocsp-graphnode.js"></script>
+  <script src="myjs/ocsp-canvas-utils.js"></script>
+  <script src="myjs/ocsp-selectable.js"></script>
+  <script src="myjs/ocsp-context-menu.js"></script>
+  <script src="myjs/ocsp-common.js"></script>
+  <script src="myjs/ocsp-actions.js"></script>
+  <script src="myjs/ocsp-draggable.js"></script>
+  <script src="myjs/ocsp-canvas.js"></script>
+
+
+</head>
+<body id="canvas-body">
+  <ul class="menu">
+    <li><a href="#!/view1">view1</a></li>
+    <li><a href="#!/view2">view2</a></li>
+  </ul>
+
+  <!--[if lt IE 7]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+  <![endif]-->
+
+  <div ng-view></div>
+
+  <div>Angular seed app: v<span app-version></span></div>
+
+  <!-- In production use:
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
+  -->
+  <script src="bower_components/angular/angular.js"></script>
+  <script src="bower_components/angular-route/angular-route.js"></script>
+  <script src="bower_components/angular-dragdrop/src/angular-dragdrop.js"></script>
+
+  <script src="app.js"></script>
+  <script src="view1/view1.js"></script>
+  <script src="view2/view2.js"></script>
+  <script src="components/version/version.js"></script>
+  <script src="components/version/version-directive.js"></script>
+  <script src="components/version/interpolate-filter.js"></script>
+
+  <div id="context-menu" class="unselectable"></div>
+
+</body>
+</html>

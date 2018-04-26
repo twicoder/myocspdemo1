@@ -1,0 +1,52 @@
+<div id="header">
+    <span>
+        <img id="first" src="../images/qq1.jpeg"
+             width="50" height="50"
+             data-drag="true"
+             data-jqyoui-options="{revert: revertCard,
+							helper: 'clone',
+							appendTo: 'body',
+							zIndex: 350}"
+             jqyoui-draggable="{index: 0,
+						placeholder:true,
+						animate:true,
+						onStart: 'startCallback'}"/>
+    </span>
+    <span>
+        <img id="second" src="../images/qq2.jpeg"
+             width="50" height="50"
+             data-drag="true"
+             data-jqyoui-options="{revert: revertCard,
+							helper: 'clone',
+							appendTo: 'body',
+							zIndex: 350}"
+             jqyoui-draggable="{index: 0,
+						placeholder:true,
+						animate:true,
+						onStart: 'startCallback'}"/>
+    </span>
+    <span>
+        <img id="third" src="../images/qq3.jpeg"
+             width="50" height="50"
+             data-drag="true"
+             data-jqyoui-options="{revert: revertCard,
+							helper: 'clone',
+							appendTo: 'body',
+							zIndex: 350}"
+             jqyoui-draggable="{index: 0,
+						placeholder:true,
+						animate:true,
+						onStart: 'startCallback'}"/>
+    </span>
+</div>
+
+
+<div id="canvas-container" style="background-color:#d3d1de" data-drop="true"
+     jqyoui-droppable="{multiple: true,
+						onDrop: 'dropCallback'}"
+     data-jqyoui-options="{hoverClass: 'ui-state-active',
+							tolerance: 'pointer'}"></div>
+
+
+
+<div id="banner-footer"></div>

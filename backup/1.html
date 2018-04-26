@@ -1,0 +1,20 @@
+
+<div class="card"
+     data-drag="true"
+     data-jqyoui-options="{revert: revertCard,
+							helper: 'clone',
+							appendTo: 'body',
+							zIndex: 350}"
+     jqyoui-draggable="{index: 0,
+						placeholder:true,
+						animate:true,
+						onStart: 'startCallback'}">
+    ThisCard
+</div>
+
+<div id="canvas-container" data-drop="true"
+     jqyoui-droppable="{multiple: true,
+						onDrop: 'dropCallback'}"
+     data-jqyoui-options="{hoverClass: 'ui-state-active',
+							tolerance: 'pointer'}"></div>
+
