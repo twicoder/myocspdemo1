@@ -9,7 +9,7 @@ angular.module('myApp.view1', ['ngRoute'])
   });
 }])
 
-.controller('View1Ctrl', ["$scope","$uibModal",'$document',function($scope, $uibModal, $document) {
+.controller('View1Ctrl', ["$scope","$uibModal",'$document','Notification',function($scope, $uibModal, $document, Notification) {
   var SCALE = 1;
   var TRANSLATE = [0, 0];
   var INCREMENT = 1.2;
@@ -35,6 +35,13 @@ angular.module('myApp.view1', ['ngRoute'])
   var canvasContainer = $('#canvas-container');
   var currentCanvasTop = canvasContainer[0].offsetTop;
   var currentCavansLeft = canvasContainer[0].offsetLeft;
+
+  var processorMap = d3.map();
+  var allConnections = d3.map();
+  var allCanvasLines = d3.map();
+  var allCanvasTexts = d3.map();
+  var allCanvasObjs = d3.map();
+
 
   $scope.startNodeId = null;
   $scope.endNodeId = null;
@@ -184,29 +191,10 @@ angular.module('myApp.view1', ['ngRoute'])
     })
   });
 
-  $scope.demoModal = function(){
-    var modal = $uibModal.open({
-      animation: true,
-      ariaLabelledBy: "modal-title-bottom",
-      ariaDescribedBy: "modal-body-bottom",
-      templateUrl: "stackedModal.html",
-      size: "lg",
-      backdrop: "static",
-      scope: $scope,
-      controller: [
-        "$scope",
-        function($scope) {
-          $scope.closeModal = function() {
-            modal.close();
-          };
-        }
-      ]
-    });
-  };
+
 
   //configureTask
-
-  $scope.configureTask = function(funcDrawTaskNode){
+  $scope.configureTask = function(newNode, funcDrawTaskNode){
     var modal = $uibModal.open({
       animation: true,
       ariaLabelledBy: "modal-title-bottom",
@@ -227,6 +215,8 @@ angular.module('myApp.view1', ['ngRoute'])
               funcDrawTaskNode();
             }
             $scope.$parent.streamName = $scope.streamName;
+            newNode.position.nodevalue = $scope.streamName;
+
             $scope.$parent.enginetype = $scope.enginetype;
             $scope.$parent.stream_description = $scope.stream_description;
             $scope.closeModal();
@@ -236,8 +226,7 @@ angular.module('myApp.view1', ['ngRoute'])
     });
   };
 
-
-  $scope.configInput = function(funcDrawInputNode){
+  $scope.configInput = function(newNode, funcDrawInputNode){
     var modal = $uibModal.open({
       animation: true,
       ariaLabelledBy: "modal-title-bottom",
@@ -265,7 +254,7 @@ angular.module('myApp.view1', ['ngRoute'])
     });
   };
 
-  $scope.configureLabel = function(funcDrawLabelNode){
+  $scope.configureLabel = function(newNode, funcDrawLabelNode){
     var modal = $uibModal.open({
       animation: true,
       ariaLabelledBy: "modal-title-bottom",
@@ -293,7 +282,7 @@ angular.module('myApp.view1', ['ngRoute'])
     });
   };
 
-  $scope.configureEvent = function (funcDrawEventlNode) {
+  $scope.configureEvent = function (newNode, funcDrawEventlNode) {
     var modal = $uibModal.open({
       animation: true,
       ariaLabelledBy: "modal-title-bottom",
@@ -328,6 +317,8 @@ angular.module('myApp.view1', ['ngRoute'])
             if (funcDrawEventlNode) {
               funcDrawEventlNode();
               $scope.$parent.task.events.push($scope.item);
+            } else {
+              // 更新事件的信息
             }
 
             $scope.closeModal();
@@ -355,6 +346,8 @@ angular.module('myApp.view1', ['ngRoute'])
           };
 
           $scope.saveNode = function () {
+
+            $scope.$parent.createStream();
             $scope.closeModal();
           };
         }
@@ -362,8 +355,34 @@ angular.module('myApp.view1', ['ngRoute'])
     });
   };
 
+  $scope.createStream = function(){
+    console.log('try to post stream data to create a stream...');
+    var successCreatedStream = true;
+    if(successCreatedStream){
+      $scope.clearGraphObjs();
 
+      processorMap.clear();
+      allConnections.clear();
+      allCanvasLines.clear();
+      allCanvasTexts.clear();
 
+      Notification.success("创建流执行成功");
+
+    }
+  };
+
+  $scope.clearGraphObjs = function(){
+    allCanvasObjs.each(function(obj){
+      obj.remove();
+    });
+    allCanvasLines.each(function(obj){
+      console.log('try to remove line obj:',obj);
+      obj.remove();
+    });
+    allCanvasTexts.each(function(obj){
+      obj.remove();
+    });
+  };
 
   $scope.getAllPossibleFields = function (fields, userFields) {
     let resultStr = fields;
@@ -373,12 +392,31 @@ angular.module('myApp.view1', ['ngRoute'])
     return resultStr;
   };
 
-
   var svg = d3.select('#canvas-container').append('svg')
     .on('contextmenu', function () {
     })
     .attr('width','100%')
     .attr('height','600px');
+
+
+  //添加defs标签
+  var defs = svg.append("defs");
+
+  var arrowMarker = defs.append("marker")
+    .attr("id","arrow")
+    .attr("markerUnits","strokeWidth")
+    .attr("markerWidth","12")
+    .attr("markerHeight","12")
+    .attr("viewBox","0 0 12 12")
+    .attr("refX","6")
+    .attr("refY","6")
+    .attr("orient","auto");
+
+  var arrow_path = "M2,2 L10,6 L2,10 L6,6 L2,2";
+  arrowMarker.append("path")
+    .attr("d",arrow_path)
+    .attr("fill","red");
+
 
 
   // create the canvas element
@@ -389,9 +427,6 @@ angular.module('myApp.view1', ['ngRoute'])
 
 
 
-  var processorMap = d3.map();
-  var allConnections = d3.map();
-  var allCanvasLines = d3.map();
 
 
 
@@ -506,13 +541,72 @@ angular.module('myApp.view1', ['ngRoute'])
 
   function refreshLines(){
 
-    console.log('refreshLines()...');
+    allCanvasLines.each(function(oldLine){
+      oldLine.remove();
+    });
+
+
+
+    var taskNode = null;
+    var inputNode = null;
+    var labelNode = null;
+    var eventNodes = new Array();
+    processorMap.each(function(oneNode){
+      console.log(oneNode.position.nodetype);
+      if(oneNode.position.nodetype === 'task'){
+        taskNode = oneNode;
+      } else if(oneNode.position.nodetype === 'input'){
+        inputNode = oneNode;
+      } else if(oneNode.position.nodetype === 'label'){
+        labelNode = oneNode;
+      } else if(oneNode.position.nodetype === 'event'){
+        eventNodes.push(oneNode);
+      }
+    });
+
+    if(taskNode && inputNode){
+      var oneLineData = drawLine(svg, taskNode.id, taskNode, inputNode);
+      allCanvasLines.set(oneLineData.id,oneLineData.line);
+    }
+    if(inputNode && labelNode){
+      var oneLineData = drawLine(svg,inputNode.id, inputNode, labelNode);
+      allCanvasLines.set(oneLineData.id,oneLineData.line);
+    }
+    if(labelNode && eventNodes.length > 0){
+      eventNodes.forEach(function(oneEventNode){
+        var oneLineData = drawLine(svg,oneEventNode.id,labelNode, oneEventNode);
+        allCanvasLines.set(oneLineData.id,oneLineData.line);
+      });
+    }
+
+  }
+
+  function drawLine(svg,id,beginNode, endNode){
+
+    var currentLine = svg.append("line")
+      .attr("x1",beginNode.position.x)
+      .attr("y1",beginNode.position.y)
+      .attr("x2",endNode.position.x)
+      .attr("y2",endNode.position.y)
+      .attr("stroke","red")
+      .attr("stroke-width",2)
+      // .attr("marker-start","url(#arrow)")
+      .attr("marker-end","url(#arrow)");
+
+    return {
+      'id': id,
+      'line':currentLine
+    };
+  }
+
+
+  function refreshLinesBackup(){
+
     allCanvasLines.each(function(oldLine){
       oldLine.remove();
     });
 
     allConnections.each(function(obj){
-      console.log(obj);
 
       var currentObjLine = svg.append("line")
         .attr("x1",processorMap.get(obj.startid).position.x)
@@ -527,9 +621,7 @@ angular.module('myApp.view1', ['ngRoute'])
       allCanvasLines.set(obj.id,currentObjLine);
 
     });
-
   }
-
 
 
   var dragCircle = d3.drag().on("drag", dragCircleMove).on('end',function(){
@@ -543,34 +635,55 @@ angular.module('myApp.view1', ['ngRoute'])
     refreshLines();
   });
 
+  function getNodeNumberByType(typename){
+    var counter = 0;
+    processorMap.each(function(oneNode){
+      if(oneNode.position.nodetype === typename){
+        counter = counter + 1;
+      }
+    });
+    return counter;
+  }
+
 
   function addNode(x,y){
     // console.log("Add one node with x=",x,"y=",y);
     var newNode = ocspspace.Graph.getNode(x,y,currentNodeType);
-    processorMap.set(newNode.id,newNode);
+
     if(currentNodeType === 'task'){
-      console.log('task node');
-      $scope.configureTask(function(){
-        drawNode(svg,processorMap.get(newNode.id));
-      });
+      if(getNodeNumberByType('task')<1){
+        $scope.configureTask(newNode,function(){
+          drawNode(svg,newNode);
+        });
+      } else {
+        $scope.configureTask(newNode);
+      }
     } else if(currentNodeType === 'input'){
-      $scope.configInput(function(){
-        drawNode(svg,processorMap.get(newNode.id));
-      });
+      if(getNodeNumberByType('input')<1){
+        $scope.configInput(newNode, function(){
+          drawNode(svg,processorMap.get(newNode.id));
+        });
+      }else{
+        $scope.configInput(newNode);
+      }
     } else if(currentNodeType ==='label') {
-      $scope.configureLabel(function(){
-        drawNode(svg,processorMap.get(newNode.id));
-      });
+      if(getNodeNumberByType('label')<1){
+        $scope.configureLabel(newNode, function(){
+          drawNode(svg,processorMap.get(newNode.id));
+        });
+      } else {
+        $scope.configureLabel(newNode);
+      }
+
     } else if(currentNodeType ==='event'){
-      $scope.configureEvent(function(){
+      $scope.configureEvent(newNode, function(){
         drawNode(svg,processorMap.get(newNode.id));
       });
     } else {
       drawNode(svg,processorMap.get(newNode.id));
     }
 
-
-
+    processorMap.set(newNode.id,newNode);
 
   }
 
@@ -594,188 +707,92 @@ angular.module('myApp.view1', ['ngRoute'])
   }
 
 
-
-  d3.select('#canvas-container').on('mousemove',function($event){
-
-    if($scope.drawStatus === "drawTmpLine"){
-      if(tmpMovingLine){
-        tmpMovingLine.remove();
-      }
-      if($scope.startNodeId){
-        tmpMovingLine = svg.append("line")
-          .attr("x1",processorMap.get($scope.startNodeId).position.x)
-          .attr("y1",processorMap.get($scope.startNodeId).position.y)
-          .attr("x2",d3.event.clientX - currentCavansLeft)
-          .attr("y2",d3.event.clientY - currentCanvasTop)
-          .attr("stroke","red")
-          .attr("stroke-width",2)
-          .attr("marker-start","url(#arrow)")
-          .attr("marker-end","url(#arrow)");
-      }
-
-
-    }
-
-  });
-
-
   function drawNode(svg,nodeInfo){
-    console.log('nodeInfo:');
-    console.log(nodeInfo);
-
-    console.log(nodeInfo.position.nodetype);
 
     if(nodeInfo.position.nodetype === "task"){
-      svg.append("circle")
+      var graphObj = svg.append("circle")
         .attr('id',nodeInfo.id)
         .attr("cx", nodeInfo.position.x)
         .attr("cy", nodeInfo.position.y)
         .attr("r", 50)
         .attr('fill','#F7DABE')
-        .on('mouseover',function(){
-          if($scope.drawStatus === "drawTmpLine"){
-            $scope.drawStatus = "stopped";
-          }
-
-        })
-        .on('mouseout',function(){
-          if(!$scope.endNodeId){
-            if($scope.drawStatus === "stopped"){
-              $scope.drawStatus = "drawTmpLine"
-            }
-
-          }
-        })
-        .on('click',function(){
-          clickedOnGraphObj(nodeInfo);
-        })
         .on('dblclick',function(){
-          $scope.configureTask();
+          $scope.configureTask(nodeInfo);
         })
-        .call(dragCircle)
-        .append('text')
-        .attr('x',10)
-        .attr('y',10)
-        .attr('width',50)
-        .attr('height',30)
-        .attr('font-size','8pt')
-        .attr('fill','black')
-        .text('Circle')
+        .call(dragCircle);
+
+      allCanvasObjs.set(nodeInfo.id, graphObj);
+
+      var textLabel = svg.append('text')
+        .attr('x',nodeInfo.position.x)
+        .attr('y',nodeInfo.position.y)
+        .attr('fill','red')
+        .text(nodeInfo.position.nodevalue);
+
+      allCanvasTexts.set('label_id_' + new Date().getTime(),textLabel);
+
 
     } else if(nodeInfo.position.nodetype === "input") {
-      svg.append('rect')
+      var graphObj = svg.append('rect')
         .attr('id',nodeInfo.id)
         .attr('x',nodeInfo.position.x-40)
         .attr('y',nodeInfo.position.y-40)
         .attr('width','80px')
         .attr('height','80px')
         .attr('fill','#6BBCBF')
-        .on('mouseover',function(){
-          if($scope.drawStatus === "drawTmpLine"){
-            $scope.drawStatus = "stopped";
-          }
-        })
-        .on('mouseout',function(){
-          // 如果离开该图片的时候，endNode被设置为空，意味着tmpLine不需要进行绘制了
-          if(!$scope.endNodeId){
-            if($scope.drawStatus === "stopped"){
-              $scope.drawStatus = "drawTmpLine"
-            }
-
-          }
-        })
-        .on('click',function(){
-          clickedOnGraphObj(nodeInfo);
-        })
         .on('dblclick',function(){
-          $scope.configInput();
+          $scope.configInput(nodeInfo);
         })
         .call(dragSecond);
 
+      allCanvasObjs.set(nodeInfo.id, graphObj);
+
     } else if(nodeInfo.position.nodetype === "label") {
-      svg.append('rect')
+      var graphObj = svg.append('rect')
         .attr('id',nodeInfo.id)
         .attr('x',nodeInfo.position.x-40)
         .attr('y',nodeInfo.position.y-40)
         .attr('width','80px')
         .attr('height','80px')
         .attr('fill','#DD7474')
-        .on('mouseover',function(){
-          if($scope.drawStatus === "drawTmpLine"){
-            $scope.drawStatus = "stopped";
-          }
-        })
-        .on('mouseout',function(){
-          if(!$scope.endNodeId){
-            if($scope.drawStatus === "stopped"){
-              $scope.drawStatus = "drawTmpLine"
-            }
-
-          }
-        })
-        .on('click',function(){
-          clickedOnGraphObj(nodeInfo);
-        })
         .on('dblclick',function(){
-          $scope.configureLabel();
+          $scope.configureLabel(nodeInfo);
         })
         .call(dragThird);
 
+      allCanvasObjs.set(nodeInfo.id, graphObj);
+
     }else if(nodeInfo.position.nodetype === "event") {
-      svg.append('rect')
+      var graphObj = svg.append('rect')
         .attr('id',nodeInfo.id)
         .attr('x',nodeInfo.position.x-40)
         .attr('y',nodeInfo.position.y-40)
         .attr('width','80px')
         .attr('height','80px')
         .attr('fill','#49B2EA')
-        .on('mouseover',function(){
-          if($scope.drawStatus === "drawTmpLine"){
-            $scope.drawStatus = "stopped";
-          }
-        })
-        .on('mouseout',function(){
-          if(!$scope.endNodeId){
-            if($scope.drawStatus === "stopped"){
-              $scope.drawStatus = "drawTmpLine"
-            }
-
-          }
-        })
-        .on('click',function(){
-          clickedOnGraphObj(nodeInfo);
-        })
         .on('dblclick',function(){
-          $scope.configureEvent();
+          $scope.configureEvent(nodeInfo);
         })
         .call(dragThird);
+
+      allCanvasObjs.set(nodeInfo.id, graphObj);
 
     } else {
       console.log ("Error!! can't find nodetype information...");
     }
+
+    refreshLines();
 
   }
 
 
   $scope.startCallback = function (event, ui) {
     currentNodeType = event.target.id;
-    console.log('Current Node Type:');
-    console.log(currentNodeType);
   };
 
-
   $scope.dropCallback = function(event, ui){
-    // var shape = {
-    //   'width':0,
-    //   'height':0
-    // }
-    // if(currentNodeType!=='task'){
-    //   shape.width = 60;
-    //   shape.height = 80;
-    // }
     addNode(event.offsetX - currentCavansLeft, event.offsetY - currentCanvasTop);
     currentNodeType = null;
-    // printAllNodeInfo();
   };
 
 

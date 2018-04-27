@@ -170,7 +170,8 @@ ocspspace.Graph = (function(){
         'position':{
           'x':posX,
           'y':posY,
-          'nodetype':currentNodeType
+          'nodetype':currentNodeType,
+          'nodevalue':null
         }
       }
     }

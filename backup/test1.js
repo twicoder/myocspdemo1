@@ -97,3 +97,66 @@ var arrowMarker = defs.append("marker")
 // }
 
 
+
+// allConnections.each(function(obj){
+//
+//   var currentObjLine = svg.append("line")
+//     .attr("x1",processorMap.get(obj.startid).position.x)
+//     .attr("y1",processorMap.get(obj.startid).position.y)
+//     .attr("x2",processorMap.get(obj.endid).position.x)
+//     .attr("y2",processorMap.get(obj.endid).position.y)
+//     .attr("stroke","red")
+//     .attr("stroke-width",2)
+//     .attr("marker-start","url(#arrow)")
+//     .attr("marker-end","url(#arrow)");
+//
+//   allCanvasLines.set(obj.id,currentObjLine);
+//
+// });
+
+
+// d3.select('#canvas-container').on('mousemove',function($event){
+//
+//   if($scope.drawStatus === "drawTmpLine"){
+//     if(tmpMovingLine){
+//       tmpMovingLine.remove();
+//     }
+//     if($scope.startNodeId){
+//       tmpMovingLine = svg.append("line")
+//         .attr("x1",processorMap.get($scope.startNodeId).position.x)
+//         .attr("y1",processorMap.get($scope.startNodeId).position.y)
+//         .attr("x2",d3.event.clientX - currentCavansLeft)
+//         .attr("y2",d3.event.clientY - currentCanvasTop)
+//         .attr("stroke","red")
+//         .attr("stroke-width",2)
+//         .attr("marker-start","url(#arrow)")
+//         .attr("marker-end","url(#arrow)");
+//     }
+//
+//
+//   }
+//
+// });
+
+
+
+// .on('mouseover',function(){
+//   if($scope.drawStatus === "drawTmpLine"){
+//     $scope.drawStatus = "stopped";
+//   }
+//
+// })
+// .on('mouseout',function(){
+//   if(!$scope.endNodeId){
+//     if($scope.drawStatus === "stopped"){
+//       $scope.drawStatus = "drawTmpLine"
+//     }
+//
+//   }
+// })
+// .on('click',function(){
+//   clickedOnGraphObj(nodeInfo);
+// })
+
+
+

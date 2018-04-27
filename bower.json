@@ -21,6 +21,7 @@
     "bootstrap-tokenfield": "^0.12.1",
     "isteven-angular-multiselect": "^4.0.0",
     "angular-translate": "^2.17.1",
-    "angular-sanitize": "^1.6.10"
+    "angular-sanitize": "^1.6.10",
+    "angular-ui-notification": "^0.3.6"
   }
 }

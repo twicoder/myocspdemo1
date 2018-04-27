@@ -9,6 +9,7 @@ angular.module('myApp', [
   'ngDragDrop',
   'ui.bootstrap',
   'isteven-multi-select',
+  'ui-notification',
   'ui.select',
   'esc-key'
 ]).
