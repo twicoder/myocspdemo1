@@ -74,3 +74,26 @@ var arrowMarker = defs.append("marker")
     }
 
   })
+
+
+
+// function drawFinalLine(){
+//   if(currentStartCenter && currentEndCenter){
+//     if(tmpMovingLine){
+//       tmpMovingLine.remove();
+//     }
+//
+//     svg.append("line")
+//       .attr("x1",currentStartCenter.x)
+//       .attr("y1",currentStartCenter.y)
+//       .attr("x2",currentEndCenter.x)
+//       .attr("y2",currentEndCenter.y)
+//       .attr("stroke","red")
+//       .attr("stroke-width",2)
+//       .attr("marker-start","url(#arrow)")
+//       .attr("marker-end","url(#arrow)")
+//
+//   }
+// }
+
+

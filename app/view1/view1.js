@@ -9,7 +9,7 @@ angular.module('myApp.view1', ['ngRoute'])
   });
 }])
 
-.controller('View1Ctrl', ["$scope",function($scope) {
+.controller('View1Ctrl', ["$scope","$uibModal",'$document',function($scope, $uibModal, $document) {
   var SCALE = 1;
   var TRANSLATE = [0, 0];
   var INCREMENT = 1.2;
@@ -35,6 +35,122 @@ angular.module('myApp.view1', ['ngRoute'])
   var canvasContainer = $('#canvas-container');
   var currentCanvasTop = canvasContainer[0].offsetTop;
   var currentCavansLeft = canvasContainer[0].offsetLeft;
+
+  $scope.startNodeId = null;
+  $scope.endNodeId = null;
+
+  var tmpMovingLine = null;
+
+  $scope.drawStatus = null;
+
+
+  $scope.doStuff = function(e){
+    console.log('e',e);
+    console.log('doStuff');
+  };
+
+  $document.bind("keypress", function(event) {
+    console.log('event');
+    console.log(event.keyCode);
+    $scope.$apply(function (){
+      if(event.keyCode == 32){
+        $scope.drawStatus = null;
+        if(tmpMovingLine){
+          tmpMovingLine.remove();
+          $scope.startNodeId = null;
+          $scope.endNodeId = null;
+        }
+
+      }else {
+        $scope.drawStatus = null;
+        if(tmpMovingLine){
+          tmpMovingLine.remove();
+          $scope.startNodeId = null;
+          $scope.endNodeId = null;
+        }
+      }
+    })
+  });
+
+  $scope.demoModal = function(){
+    var modal = $uibModal.open({
+      animation: true,
+      ariaLabelledBy: "modal-title-bottom",
+      ariaDescribedBy: "modal-body-bottom",
+      templateUrl: "stackedModal.html",
+      size: "lg",
+      backdrop: "static",
+      scope: $scope,
+      controller: [
+        "$scope",
+        function($scope) {
+          $scope.closeModal = function() {
+            modal.close();
+          };
+        }
+      ]
+    });
+  };
+
+  $scope.configInput = function(){
+    var modal = $uibModal.open({
+      animation: true,
+      ariaLabelledBy: "modal-title-bottom",
+      ariaDescribedBy: "modal-body-bottom",
+      templateUrl: "configureInput.html",
+      size: "lg",
+      backdrop: "static",
+      scope: $scope,
+      controller: [
+        "$scope",
+        function($scope) {
+          $scope.closeModal = function() {
+            modal.close();
+          };
+        }
+      ]
+    });
+  };
+
+  $scope.configureLabel = function(){
+    var modal = $uibModal.open({
+      animation: true,
+      ariaLabelledBy: "modal-title-bottom",
+      ariaDescribedBy: "modal-body-bottom",
+      templateUrl: "configureLabel.html",
+      size: "lg",
+      backdrop: "static",
+      scope: $scope,
+      controller: [
+        "$scope",
+        function($scope) {
+          $scope.closeModal = function() {
+            modal.close();
+          };
+        }
+      ]
+    });
+  };
+
+  $scope.configureEvent = function(){
+    var modal = $uibModal.open({
+      animation: true,
+      ariaLabelledBy: "modal-title-bottom",
+      ariaDescribedBy: "modal-body-bottom",
+      templateUrl: "configureEvent.html",
+      size: "lg",
+      backdrop: "static",
+      scope: $scope,
+      controller: [
+        "$scope",
+        function($scope) {
+          $scope.closeModal = function() {
+            modal.close();
+          };
+        }
+      ]
+    });
+  };
 
 
 
@@ -83,6 +199,7 @@ angular.module('myApp.view1', ['ngRoute'])
   }
 
   function dragSeocndMove(){
+    console.log('$(this)');
     var currObjId = $(this)[0].id;
 
     console.log('dragSeocndMove:');
@@ -94,15 +211,15 @@ angular.module('myApp.view1', ['ngRoute'])
       processorMap.set(currObjId, {
         'id':currObjId,
         'position':{
-          'x':d3.event.x - 30,
-          'y':d3.event.y - 40,
+          'x':d3.event.x,
+          'y':d3.event.y,
           'nodetype':processorMap.get(currObjId).position.nodetype
         }
       });
 
 
       d3.select(this)
-        .attr('x',$(this).x = d3.event.x - 30)
+        .attr('x',$(this).x = d3.event.x - 40)
         .attr('y',$(this).y = d3.event.y - 40);
 
       refreshLines();
@@ -117,46 +234,55 @@ angular.module('myApp.view1', ['ngRoute'])
     processorMap.set(currObjId, {
       'id':currObjId,
       'position':{
-        'x':d3.event.x - 30,
-        'y':d3.event.y - 40,
+        'x':d3.event.x,
+        'y':d3.event.y,
         'nodetype':processorMap.get(currObjId).position.nodetype
       }
     });
 
 
     d3.select(this)
-      .attr('x',$(this).x = d3.event.x - 30)
+      .attr('x',$(this).x = d3.event.x - 40)
       .attr('y',$(this).y = d3.event.y - 40);
 
     refreshLines();
 
   }
 
-  var startNode = null;
-  var endNode = null;
 
-  var shouldDraw = false;
-  var currentStartCenter = null;
-  var currentEndCenter = null;
-  var tmpMovingLine = null;
 
   function clickedOnGraphObj(graphObj){
-    if(!startNode){
-      startNode = graphObj;
-    } else if(!endNode){
-      endNode = graphObj;
+    if(!$scope.startNodeId){
+      $scope.startNodeId = graphObj.id;
+      $scope.drawStatus = "drawTmpLine";
+    } else if(!$scope.endNodeId){
+      $scope.endNodeId = graphObj.id;
 
       // In this case, we should delete the tmpMovingLine and update all lines info
-      var connectionObj = {
-        'id':"line-id-"+new Date().getTime(),
-        'startid':startNode.id,
-        'endid':endNode.id
-      };
+      if($scope.startNodeId !== $scope.endNodeId){
+        var connectionObj = {
+          'id':"line-id-"+new Date().getTime(),
+          'startid':$scope.startNodeId,
+          'endid':$scope.endNodeId
+        };
+        allConnections.set(connectionObj.id, connectionObj);
+      } else {
 
-      allConnections.set(connectionObj.id, connectionObj);
+      }
 
-      startNode = null;
-      endNode = null;
+
+
+
+      $scope.startNodeId = null;
+      $scope.endNodeId = null;
+      $scope.drawStatus = "removeTmpLine";
+
+      // before draw all official lines, remove the tmpline.
+      if(tmpMovingLine){
+        tmpMovingLine.remove();
+      }
+
+      $scope.drawStatus = null;
 
       refreshLines();
 
@@ -197,20 +323,31 @@ angular.module('myApp.view1', ['ngRoute'])
     // console.log('dropped!');
     refreshLines();
   });
-  var dragSecond = d3.drag().on("drag", dragSeocndMove);
-  var dragThird = d3.drag().on("drag", dragThirdMove);
+  var dragSecond = d3.drag().on("drag", dragSeocndMove).on('end',function(){
+    refreshLines();
+  });
+  var dragThird = d3.drag().on("drag", dragThirdMove).on('end',function(){
+    refreshLines();
+  });
 
 
   function addNode(x,y){
     // console.log("Add one node with x=",x,"y=",y);
     var newNode = ocspspace.Graph.getNode(x,y,currentNodeType);
     processorMap.set(newNode.id,newNode);
-    console.log('new added node:');
-    console.log(newNode);
+    if(currentNodeType === 'task'){
+      console.log('task node');
+    }
+
     drawNode(svg,processorMap.get(newNode.id));
 
-    // ocspspace.Graph.add(newNode,false);
+
   }
+
+  $scope.printNodes = function () {
+    printAllNodeInfo();
+  };
+
 
   function printAllNodeInfo(){
     console.log('Now print all node info:');
@@ -230,14 +367,14 @@ angular.module('myApp.view1', ['ngRoute'])
 
   d3.select('#canvas-container').on('mousemove',function($event){
 
-    if(shouldDraw){
+    if($scope.drawStatus === "drawTmpLine"){
       if(tmpMovingLine){
         tmpMovingLine.remove();
       }
-      if(currentStartCenter){
+      if($scope.startNodeId){
         tmpMovingLine = svg.append("line")
-          .attr("x1",currentStartCenter.x)
-          .attr("y1",currentStartCenter.y)
+          .attr("x1",processorMap.get($scope.startNodeId).position.x)
+          .attr("y1",processorMap.get($scope.startNodeId).position.y)
           .attr("x2",d3.event.clientX - currentCavansLeft)
           .attr("y2",d3.event.clientY - currentCanvasTop)
           .attr("stroke","red")
@@ -251,24 +388,6 @@ angular.module('myApp.view1', ['ngRoute'])
 
   });
 
-  // function drawFinalLine(){
-  //   if(currentStartCenter && currentEndCenter){
-  //     if(tmpMovingLine){
-  //       tmpMovingLine.remove();
-  //     }
-  //
-  //     svg.append("line")
-  //       .attr("x1",currentStartCenter.x)
-  //       .attr("y1",currentStartCenter.y)
-  //       .attr("x2",currentEndCenter.x)
-  //       .attr("y2",currentEndCenter.y)
-  //       .attr("stroke","red")
-  //       .attr("stroke-width",2)
-  //       .attr("marker-start","url(#arrow)")
-  //       .attr("marker-end","url(#arrow)")
-  //
-  //   }
-  // }
 
   function drawNode(svg,nodeInfo){
     console.log('nodeInfo:');
@@ -282,9 +401,26 @@ angular.module('myApp.view1', ['ngRoute'])
         .attr("cx", nodeInfo.position.x)
         .attr("cy", nodeInfo.position.y)
         .attr("r", 50)
-        .attr('fill','#cc3311')
+        .attr('fill','#F7DABE')
+        .on('mouseover',function(){
+          if($scope.drawStatus === "drawTmpLine"){
+            $scope.drawStatus = "stopped";
+          }
+
+        })
+        .on('mouseout',function(){
+          if(!$scope.endNodeId){
+            if($scope.drawStatus === "stopped"){
+              $scope.drawStatus = "drawTmpLine"
+            }
+
+          }
+        })
         .on('click',function(){
           clickedOnGraphObj(nodeInfo);
+        })
+        .on('dblclick',function(){
+
         })
         .call(dragCircle)
         .append('text')
@@ -298,32 +434,90 @@ angular.module('myApp.view1', ['ngRoute'])
 
     } else if(nodeInfo.position.nodetype === "input") {
       svg.append('rect')
-        .attr('x',nodeInfo.position.x-30)
+        .attr('id',nodeInfo.id)
+        .attr('x',nodeInfo.position.x-40)
         .attr('y',nodeInfo.position.y-40)
-        .attr('width','60px')
+        .attr('width','80px')
         .attr('height','80px')
-        .attr('fill','#aa00ee')
+        .attr('fill','#6BBCBF')
+        .on('mouseover',function(){
+          if($scope.drawStatus === "drawTmpLine"){
+            $scope.drawStatus = "stopped";
+          }
+        })
+        .on('mouseout',function(){
+          // 如果离开该图片的时候，endNode被设置为空，意味着tmpLine不需要进行绘制了
+          if(!$scope.endNodeId){
+            if($scope.drawStatus === "stopped"){
+              $scope.drawStatus = "drawTmpLine"
+            }
+
+          }
+        })
         .on('click',function(){
           clickedOnGraphObj(nodeInfo);
+        })
+        .on('dblclick',function(){
+          $scope.configInput();
         })
         .call(dragSecond);
 
     } else if(nodeInfo.position.nodetype === "label") {
       svg.append('rect')
-        .attr('x',nodeInfo.position.x-30)
+        .attr('id',nodeInfo.id)
+        .attr('x',nodeInfo.position.x-40)
         .attr('y',nodeInfo.position.y-40)
-        .attr('width','60px')
+        .attr('width','80px')
         .attr('height','80px')
-        .attr('fill','#11bb22')
+        .attr('fill','#DD7474')
+        .on('mouseover',function(){
+          if($scope.drawStatus === "drawTmpLine"){
+            $scope.drawStatus = "stopped";
+          }
+        })
+        .on('mouseout',function(){
+          if(!$scope.endNodeId){
+            if($scope.drawStatus === "stopped"){
+              $scope.drawStatus = "drawTmpLine"
+            }
+
+          }
+        })
+        .on('click',function(){
+          clickedOnGraphObj(nodeInfo);
+        })
+        .on('dblclick',function(){
+          $scope.configureLabel();
+        })
         .call(dragThird);
 
     }else if(nodeInfo.position.nodetype === "event") {
       svg.append('rect')
-        .attr('x',nodeInfo.position.x-30)
+        .attr('id',nodeInfo.id)
+        .attr('x',nodeInfo.position.x-40)
         .attr('y',nodeInfo.position.y-40)
-        .attr('width','60px')
+        .attr('width','80px')
         .attr('height','80px')
-        .attr('fill','#11bb22')
+        .attr('fill','#49B2EA')
+        .on('mouseover',function(){
+          if($scope.drawStatus === "drawTmpLine"){
+            $scope.drawStatus = "stopped";
+          }
+        })
+        .on('mouseout',function(){
+          if(!$scope.endNodeId){
+            if($scope.drawStatus === "stopped"){
+              $scope.drawStatus = "drawTmpLine"
+            }
+
+          }
+        })
+        .on('click',function(){
+          clickedOnGraphObj(nodeInfo);
+        })
+        .on('dblclick',function(){
+          $scope.configureEvent();
+        })
         .call(dragThird);
 
     } else {
@@ -335,10 +529,20 @@ angular.module('myApp.view1', ['ngRoute'])
 
   $scope.startCallback = function (event, ui) {
     currentNodeType = event.target.id;
+    console.log('Current Node Type:');
+    console.log(currentNodeType);
   };
 
 
   $scope.dropCallback = function(event, ui){
+    // var shape = {
+    //   'width':0,
+    //   'height':0
+    // }
+    // if(currentNodeType!=='task'){
+    //   shape.width = 60;
+    //   shape.height = 80;
+    // }
     addNode(event.offsetX - currentCavansLeft, event.offsetY - currentCanvasTop);
     currentNodeType = null;
     // printAllNodeInfo();

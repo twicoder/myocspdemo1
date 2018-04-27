@@ -1,5 +1,153 @@
+<script type="text/ng-template" id="stackedModal.html">
+    <div class="modal-header">
+        <button type="button" class="close" ng-click="closeModal()"><span aria-hidden="true">&times;</span></button>
+        <div class="modal-title">Title</div>
+    </div>
+    <div class="modal-body">
+        <form name="myForm" id="mainFrame">
+            <div class="form-group">
+                <label>Label1*</label>
+                <input type="text" name="name" class="form-control" ng-model="newDatasource.name" required>
+                <span class="redtip" ng-messages="myForm.name.$error"
+                      ng-if="myForm.name.$touched">
+                </span>
+            </div>
+
+
+            <div class="form-group">
+                <label>Label2</label>
+                <textarea ng-model="newDatasource.description" class="form-control" rows="6"></textarea>
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-primary" ng-click="closeModal()">保存</button>
+            </div>
+        </form>
+    </div>
+</script>
+
+
+<script type="text/ng-template" id="configureTask.html">
+    <div class="modal-header">
+        <button type="button" class="close" ng-click="closeModal()"><span aria-hidden="true">&times;</span></button>
+        <div class="modal-title">Title</div>
+    </div>
+    <div class="modal-body">
+        <form name="myForm" id="configTaskMainFrame">
+            <div class="form-group">
+                <label>Label1*</label>
+                <input type="text" name="name" class="form-control" ng-model="newDatasource.name" required>
+                <span class="redtip" ng-messages="myForm.name.$error"
+                      ng-if="myForm.name.$touched">
+                </span>
+            </div>
+
+
+            <div class="form-group">
+                <label>Label2</label>
+                <textarea ng-model="newDatasource.description" class="form-control" rows="6"></textarea>
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-primary" ng-click="closeModal()">保存</button>
+            </div>
+        </form>
+    </div>
+</script>
+
+
+<script type="text/ng-template" id="configureInput.html">
+    <div class="modal-header">
+        <button type="button" class="close" ng-click="closeModal()"><span aria-hidden="true">&times;</span></button>
+        <div class="modal-title">Title</div>
+    </div>
+    <div class="modal-body">
+        <form name="myForm" id="configInputMainFrame">
+            <div class="form-group">
+                <label>Label1*</label>
+                <input type="text" name="name" class="form-control" ng-model="newDatasource.name" required>
+                <span class="redtip" ng-messages="myForm.name.$error"
+                      ng-if="myForm.name.$touched">
+                </span>
+            </div>
+
+
+            <div class="form-group">
+                <label>Label2</label>
+                <textarea ng-model="newDatasource.description" class="form-control" rows="6"></textarea>
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-primary" ng-click="closeModal()">保存</button>
+            </div>
+        </form>
+    </div>
+</script>
+
+
+<script type="text/ng-template" id="configureLabel.html">
+    <div class="modal-header">
+        <button type="button" class="close" ng-click="closeModal()"><span aria-hidden="true">&times;</span></button>
+        <div class="modal-title">Title</div>
+    </div>
+    <div class="modal-body">
+        <form name="myForm" id="configLabelMainFrame">
+            <div class="form-group">
+                <label>Label1*</label>
+                <input type="text" name="name" class="form-control" ng-model="newDatasource.name" required>
+                <span class="redtip" ng-messages="myForm.name.$error"
+                      ng-if="myForm.name.$touched">
+                </span>
+            </div>
+
+
+            <div class="form-group">
+                <label>Label2</label>
+                <textarea ng-model="newDatasource.description" class="form-control" rows="6"></textarea>
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-primary" ng-click="closeModal()">保存</button>
+            </div>
+        </form>
+    </div>
+</script>
+
+<script type="text/ng-template" id="configureEvent.html">
+    <div class="modal-header">
+        <button type="button" class="close" ng-click="closeModal()"><span aria-hidden="true">&times;</span></button>
+        <div class="modal-title">Title</div>
+    </div>
+    <div class="modal-body">
+        <form name="myForm" id="configEventMainFrame">
+            <div class="form-group">
+                <label>Label1*</label>
+                <input type="text" name="name" class="form-control" ng-model="newDatasource.name" required>
+                <span class="redtip" ng-messages="myForm.name.$error"
+                      ng-if="myForm.name.$touched">
+                </span>
+            </div>
+
+
+            <div class="form-group">
+                <label>Label2</label>
+                <textarea ng-model="newDatasource.description" class="form-control" rows="6"></textarea>
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-primary" ng-click="closeModal()">保存</button>
+            </div>
+        </form>
+    </div>
+</script>
+
+
+
+
 <div class="row">
-    <div class="col-md-2 col-md-offset-10">
+    <div class="col-md-10">
+        <a ng-click="printNodes()">Print All Nodes</a>
+        <span>{{drawStatus}}</span>
+        <a class="btn btn-primary" ng-click="demoModal()">Demo Modal</a>
+        <span>{{startNode}}</span>
+        <span>{{endNode}}</span>
+    </div>
+    <div class="col-md-2">
         <span>
             <img id="task" src="../images/task.png"
              width="50" height="50"
@@ -57,8 +205,9 @@
 </div>
 
 
-<div class="row">
-    <div id="canvas-container" data-drop="true"
+
+<div class="row" esc-key="doStuff()">
+    <div id="canvas-container" esc-key="doStuff()" data-drop="true"
          jqyoui-droppable="{multiple: true,
 						onDrop: 'dropCallback'}"
          data-jqyoui-options="{hoverClass: 'ui-state-active',

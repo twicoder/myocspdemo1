@@ -14,6 +14,8 @@
     "d3": "^5.1.0",
     "jquery": "^3.3.1",
     "angular-dragdrop": "^1.0.13",
-    "bootstrap": "3"
+    "bootstrap": "3",
+    "angular-bootstrap": "^2.5.0",
+    "angular-esc-key": "^0.0.2"
   }
 }
