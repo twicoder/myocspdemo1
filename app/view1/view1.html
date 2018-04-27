@@ -26,28 +26,41 @@
 </script>
 
 
+
+
 <script type="text/ng-template" id="configureTask.html">
     <div class="modal-header">
         <button type="button" class="close" ng-click="closeModal()"><span aria-hidden="true">&times;</span></button>
-        <div class="modal-title">Title</div>
+        <div class="modal-title">设置流基本信息</div>
     </div>
     <div class="modal-body">
         <form name="myForm" id="configTaskMainFrame">
+
             <div class="form-group">
-                <label>Label1*</label>
-                <input type="text" name="name" class="form-control" ng-model="newDatasource.name" required>
+                <label>流类型</label>
+                <select class="form-control" ng-model="enginetype" required>
+                    <option value="SPARK" selected="true">SPARK</option>
+                    <option value="STORM">STORM</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>名称*</label>
+                <input type="text" name="name" class="form-control" ng-model="streamName" required>
                 <span class="redtip" ng-messages="myForm.name.$error"
-                      ng-if="myForm.name.$touched">
+                      ng-if="configTaskMainFrame.name.$touched">
                 </span>
             </div>
 
+            <div ng-show="enginetype === 'SPARK'">
+                <div class="form-group">
+                    <label >描述</label>
+                    <textarea ng-model="stream_description" class="form-control" rows="6"></textarea>
+                </div>
+            </div>
 
             <div class="form-group">
-                <label>Label2</label>
-                <textarea ng-model="newDatasource.description" class="form-control" rows="6"></textarea>
-            </div>
-            <div class="form-group">
-                <button type="button" class="btn btn-primary" ng-click="closeModal()">保存</button>
+                <button type="button" class="btn btn-primary" ng-click="saveNode()">保存</button>
             </div>
         </form>
     </div>
@@ -57,25 +70,155 @@
 <script type="text/ng-template" id="configureInput.html">
     <div class="modal-header">
         <button type="button" class="close" ng-click="closeModal()"><span aria-hidden="true">&times;</span></button>
-        <div class="modal-title">Title</div>
+        <div class="modal-title">设置输入</div>
     </div>
     <div class="modal-body">
         <form name="myForm" id="configInputMainFrame">
-            <div class="form-group">
-                <label>Label1*</label>
-                <input type="text" name="name" class="form-control" ng-model="newDatasource.name" required>
-                <span class="redtip" ng-messages="myForm.name.$error"
-                      ng-if="myForm.name.$touched">
-                </span>
+
+            <div class="row">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">输入源*</label>
+                    <div class="col-sm-10">
+                        <ui-select ng-model="datasource" ng-required="true">
+                            <ui-select-match>
+                                <span ng-bind="$select.selected.name"></span>
+                            </ui-select-match>
+                            <ui-select-choices
+                                    repeat="datasource in (inputDatasources | filter: $select.search) track by datasource.id">
+                                <span ng-bind="datasource.name"></span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">
+                        <button type="button" class="btn btn-primary" ng-click="addInputSource(task.input.inputs)">
+                            添加输入源
+                        </button>
+                    </label>
+                    <div class="col-sm-10">
+                        <uib-accordion>
+                            <div uib-accordion-group class="panel-default" ng-repeat="item in task.input.inputs"
+                                 is-open="item.isOpen">
+                                <uib-accordion-heading>
+                                    <i class="pull-left glyphicon"
+                                       ng-class="{'glyphicon-chevron-down': item.isOpen, 'glyphicon-chevron-right': !item.isOpen}"></i>
+                                    &nbsp; 输入源 {{item.name}}
+                                    <a class="pull-right"
+                                       ng-click="$event.stopPropagation();$event.preventDefault();remove(task.input.inputs, $index)"><i
+                                            class="glyphicon glyphicon-remove"></i></a>
+                                </uib-accordion-heading>
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">Kafka Topic*</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" ng-model="item.topic" required>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">名称*</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" ng-model="item.name" required>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">输入源的字段*</label>
+                                            <div class="col-sm-10">
+                                                <tokenfield ng-model="item.fields" required="true"></tokenfield>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">输入源字段分隔符*</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" ng-model="item.delim" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </uib-accordion>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">可用字段*</label>
+                    <div class="col-sm-10">
+                        <tokenfield ng-model="task.input.fields" disabled="true" required="true"></tokenfield>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <div class="col-sm-10 col-sm-offset-2">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th class="col-md-3">转义字段名</th>
+                                <th class="col-md-8">case when表达式</th>
+                                <th class="col-md-1"><a ng-click="addUserField(task.input)"><i
+                                        class="glyphicon glyphicon-plus"></i></a></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="userfield in task.input.userFields">
+                                <td><input type="text" class="form-control" ng-model="userfield.pname" required></td>
+                                <td><input type="text" class="form-control" ng-model="userfield.pvalue" required></td>
+                                <td><a ng-click="remove(task.input.userFields, $index)"><i
+                                        class="glyphicon glyphicon-remove"></i></a></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">过滤条件*</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" ng-model="task.input.filter_expr">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">作为主键的字段*</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" ng-model="task.input.uniqueKey" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <div class="col-sm-2">
+                        <button type="button" class="btn btn-primary" ng-click="generate(task.input, task.input.inputs)">
+                           生成可用字段
+                        </button>
+                    </div>
+                </div>
             </div>
 
 
             <div class="form-group">
-                <label>Label2</label>
-                <textarea ng-model="newDatasource.description" class="form-control" rows="6"></textarea>
-            </div>
-            <div class="form-group">
-                <button type="button" class="btn btn-primary" ng-click="closeModal()">保存</button>
+                <button type="button" class="btn btn-primary pull-right" ng-click="saveNode()">保存</button>
             </div>
         </form>
     </div>
@@ -85,25 +228,35 @@
 <script type="text/ng-template" id="configureLabel.html">
     <div class="modal-header">
         <button type="button" class="close" ng-click="closeModal()"><span aria-hidden="true">&times;</span></button>
-        <div class="modal-title">Title</div>
+        <div class="modal-title">选择标签</div>
     </div>
     <div class="modal-body">
         <form name="myForm" id="configLabelMainFrame">
-            <div class="form-group">
-                <label>Label1*</label>
-                <input type="text" name="name" class="form-control" ng-model="newDatasource.name" required>
-                <span class="redtip" ng-messages="myForm.name.$error"
-                      ng-if="myForm.name.$touched">
-                </span>
-            </div>
 
+            <!--<div class="form-group">-->
+                <!--<isteven-multi-select input-model="inputLabels" output-model="task.outputLabels" button-label="name"-->
+                                      <!--item-label="name" tick-property="tick1"-->
+                                      <!--helper-elements="filter" translation="localLang" required>-->
+                <!--</isteven-multi-select>-->
+            <!--</div>-->
+            <!--<div class="form-group">-->
+                <!--<ul dnd-list="task.outputLabels">-->
+                    <!--<li ng-repeat="item in task.outputLabels" dnd-draggable="item"-->
+                        <!--dnd-moved="sortLabels(task.outputLabels, $index)" dnd-effect-allowed="move"-->
+                        <!--dnd-selected="models.selected = item" ng-class="{'selected': models.selected === item}">-->
+                        <!--<dnd-nodrag>-->
+                            <!--<div dnd-handle class="handle"><span class="badge">{{$index+1}}</span>&nbsp;{{item.name}}-->
+                            <!--</div>-->
+                        <!--</dnd-nodrag>-->
+                    <!--</li>-->
+                    <!--<li class="dndPlaceholder">-->
+                        <!--搜索-->
+                    <!--</li>-->
+                <!--</ul>-->
+            <!--</div>-->
 
             <div class="form-group">
-                <label>Label2</label>
-                <textarea ng-model="newDatasource.description" class="form-control" rows="6"></textarea>
-            </div>
-            <div class="form-group">
-                <button type="button" class="btn btn-primary" ng-click="closeModal()">保存</button>
+                <button type="button" class="btn btn-primary" ng-click="saveNode()">保存</button>
             </div>
         </form>
     </div>
@@ -112,25 +265,114 @@
 <script type="text/ng-template" id="configureEvent.html">
     <div class="modal-header">
         <button type="button" class="close" ng-click="closeModal()"><span aria-hidden="true">&times;</span></button>
-        <div class="modal-title">Title</div>
+        <div class="modal-title">创建事件</div>
     </div>
     <div class="modal-body">
         <form name="myForm" id="configEventMainFrame">
-            <div class="form-group">
-                <label>Label1*</label>
-                <input type="text" name="name" class="form-control" ng-model="newDatasource.name" required>
-                <span class="redtip" ng-messages="myForm.name.$error"
-                      ng-if="myForm.name.$touched">
-                </span>
+            <div class="row">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">事件名字*</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" ng-model="item.name" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">需要输出的字段*</label>
+                    <div class="col-sm-10">
+                        <tokenfield
+                                inputs="{{getAllPossibleFields(task.input.fields,task.input.userFields)}}"
+                                labels="{{task.outputLabels}}" ng-model="item.select_expr"
+                                checkinputfield=true required="true"></tokenfield>
+                    </div>
+                    <span id="idWarningMessageOfTokenField" class="redtip col-sm-offset-2"
+                          ng-show="outputFieldsInvalid">{{outputFieldsInvalidMessage}}</span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">输出字段分隔符*</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" ng-model="item.delim" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">过滤条件*</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" ng-model="item.filter_expr">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">输出事件的时间间隔*</label>
+                    <div class="col-sm-10">
+                        <input type="number" class="form-control" ng-model="item.interval"
+                               ng-pattern="/^(0|[1-9][0-9]*)$/" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">作为主键的字段*</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" ng-model="item.output.uniqueKey" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">事件输出源*</label>
+                    <div class="col-sm-10">
+                        <ui-select ng-model="item.output.datasource" ng-required="true">
+                            <ui-select-match>
+                                <span ng-bind="$select.selected.name"></span>
+                            </ui-select-match>
+                            <ui-select-choices
+                                    repeat="datasource in (datasources | filter: $select.search) track by datasource.id">
+                                <span ng-bind="datasource.name"></span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" ng-if="item.output.datasource.type == 'kafka'">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Kafka topic*</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" ng-model="item.output.topic" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" ng-if="item.output.datasource.type == 'codis'">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">输出到Codis中Key的前缀*</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" ng-model="item.output.codisKeyPrefix"
+                               required>
+                    </div>
+                </div>
             </div>
 
 
             <div class="form-group">
-                <label>Label2</label>
-                <textarea ng-model="newDatasource.description" class="form-control" rows="6"></textarea>
+                <br ng-repeat="val in datasources">
             </div>
+
+
             <div class="form-group">
-                <button type="button" class="btn btn-primary" ng-click="closeModal()">保存</button>
+                <button type="button" class="btn btn-primary" ng-click="saveNode()">保存</button>
             </div>
         </form>
     </div>
@@ -138,16 +380,70 @@
 
 
 
+<script type="text/ng-template" id="previewTaskDetails.html">
+    <div class="modal-header">
+        <button type="button" class="close" ng-click="closeModal()"><span aria-hidden="true">&times;</span></button>
+        <div class="modal-title">预览流信息</div>
+    </div>
+    <div class="modal-body">
+        <form name="myForm" id="configEventMainFrame2">
+            <h1 class="page-header">
+                {{streamName}}
+            </h1>
+
+            <div class="row" ng-show="task.input.inputs !== undefined && task.input.inputs.length > 0">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">输入源:</label>
+                    <div class="col-sm-10">
+                        <ul class="list-group">
+                            <li ng-repeat="item in task.input.inputs" class="list-group-item"><strong>{{item.name}}</strong>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" ng-show="task.outputLabels !== undefined && task.outputLabels.length > 0">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">标签：</label>
+                    <div class="col-sm-10">
+                        <ul class="list-group">
+                            <li ng-repeat="item in task.outputLabels" class="list-group-item"><span class="badge">{{$index+1}}</span>&nbsp;{{item.name}}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" ng-show="task.events !== undefined && task.events.length > 0">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">事件：</label>
+                    <div class="col-sm-10">
+                        <ul class="list-group">
+                            <li ng-repeat="item in task.events" class="list-group-item"><strong>{{item.name}}</strong>({{item.output.datasource.type}})
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <button type="button" class="btn btn-primary" ng-click="saveNode()">保存</button>
+            </div>
+        </form>
+    </div>
+</script>
+
 
 <div class="row">
-    <div class="col-md-10">
+    <div class="col-md-8">
         <a ng-click="printNodes()">Print All Nodes</a>
         <span>{{drawStatus}}</span>
-        <a class="btn btn-primary" ng-click="demoModal()">Demo Modal</a>
-        <span>{{startNode}}</span>
-        <span>{{endNode}}</span>
+        <label>StreamName:</label><input ng-model="streamName" readonly="true"/>
+        <label>EngineType:</label><input ng-model="enginetype" readonly="true"/>
+        <label>Events:</label><span>{{task.events.length}}</span>
     </div>
-    <div class="col-md-2">
+    <div class="col-md-4">
         <span>
             <img id="task" src="../images/task.png"
              width="50" height="50"
@@ -200,6 +496,7 @@
 						animate:true,
 						onStart: 'startCallback'}"/>
         </span>
+        <a class="btn btn-primary pull-right" ng-click="preview()">Preview</a>
     </div>
 
 </div>

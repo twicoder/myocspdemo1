@@ -8,6 +8,8 @@ angular.module('myApp', [
   'myApp.version',
   'ngDragDrop',
   'ui.bootstrap',
+  'isteven-multi-select',
+  'ui.select',
   'esc-key'
 ]).
 config(['$locationProvider', '$routeProvider', function($locationProvider, $routeProvider) {

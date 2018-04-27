@@ -43,6 +43,118 @@ angular.module('myApp.view1', ['ngRoute'])
 
   $scope.drawStatus = null;
 
+  $scope.task = {
+    'input':{
+      'inputs':[]
+    }
+  };
+  $scope.task.events = [];
+
+  $scope.task.outputLabels = [{"id":6,"name":"Example","class_name":"com.asiainfo.ocsp.label.Example","properties":"{\"props\":[{\"pname\":\"a\",\"pvalue\":\"123\"}],\"labelItems\":[]}","owner":"ocspadmin","tick1":true}];
+  $scope.streamName = null;
+  $scope.enginetype = null;
+  $scope.stream_description = null;
+  $scope.datasourcecount = 5;
+
+
+  $scope.inputDatasources = [{"id":1,"name":"Kafka data source","type":"kafka","status":1,"description":null,"properties":"[{\"pname\":\"zookeeper.connect\",\"pvalue\":\"10.1.241.59:2181\"},{\"pname\":\"metadata.broker.list\",\"pvalue\":\"10.1.241.57:6667\"}]"},{"id":4,"name":"t2","type":"kafka","status":2,"description":"test123","properties":"[{\"pname\":\"zookeeper.connect\",\"pvalue\":\"connection12\"},{\"pname\":\"metadata.broker.list\",\"pvalue\":\"brokerlist12\"}]"},{"id":5,"name":"111231","type":"kafka","status":2,"description":"test","properties":"[{\"pname\":\"zookeeper.connect\",\"pvalue\":\"tt123\"},{\"pname\":\"metadata.broker.list\",\"pvalue\":\"123123\"}]"}];
+  $scope.datasource = null;
+
+
+  $scope.addNewEvent = function (array) {
+    if (array !== undefined) {
+      array.push({
+        status: 1,
+        output: {},
+        userFields: [],
+        interval: 0,
+        audit: {
+          enableDate: "none",
+          type: "always",
+        },
+        auditTypes: [
+          { name: 'none', displayName: '重复：无' },
+          { name: 'always', displayName: '重复：每批次' },
+          { name: 'day', displayName: '重复：每天' },
+          { name: 'week', displayName: '重复：每周' },
+          { name: 'month', displayName: '重复：每月' }
+        ]
+      });
+    }
+  };
+
+
+  $scope.add = function (array) {
+    if (array !== undefined) {
+      array.push({
+        status: 1,
+        output: {},
+        userFields: []
+      });
+    }
+  };
+
+  $scope.addUserField = function (input) {
+    if (input.userFields === undefined || input.userFields === null) {
+      input.userFields = [];
+    }
+    input.userFields.push({
+      pname: "",
+      pvalue: ""
+    });
+  };
+
+  $scope.addInputSource = function (inputsources) {
+    if (!!inputsources) {
+      if (inputsources.length < $scope.datasourcecount) {
+        $scope.add(inputsources);
+      } else {
+        console.log('addInputSource error!');
+        // Notification.error($filter('translate')('ocsp_web_streams_manage_exceedmaxinputsourcecount_part1') + ' ' + $scope.datasourcecount + ' ' + $filter('translate')('ocsp_web_streams_manage_exceedmaxinputsourcecount_part2'));
+      }
+    }
+  };
+
+  $scope.split = function (str) {
+    let result = [];
+    if (str !== undefined && str.length > 0) {
+      let tmp = str.split(",");
+      for (let i in tmp) {
+        result.push(tmp[i].trim());
+      }
+    }
+    return result;
+  };
+
+  $scope.generate = function (inputs, array) {
+    let str = "";
+    if (array !== undefined && array.length > 0) {
+      let result = new Set();
+      if (array[0].fields !== undefined && array[0].fields.trim() !== "") {
+        result = new Set($scope.split(array[0].fields));
+      }
+      for (let i = 1; i < array.length; i++) {
+        let tmp = new Set();
+        if (array[i].fields !== undefined && array[i].fields.trim() !== "") {
+          let splits = $scope.split(array[i].fields);
+          for (let j in splits) {
+            if (result.has(splits[j])) {
+              tmp.add(splits[j]);
+            }
+          }
+        }
+        result = tmp;
+      }
+      let resultArray = [...result];
+      if (resultArray.length > 0) {
+        str = resultArray[0];
+        for (let i = 1; i < resultArray.length; i++) {
+          str += "," + resultArray[i];
+        }
+      }
+    }
+    inputs.fields = str;
+  };
 
   $scope.doStuff = function(e){
     console.log('e',e);
@@ -92,7 +204,40 @@ angular.module('myApp.view1', ['ngRoute'])
     });
   };
 
-  $scope.configInput = function(){
+  //configureTask
+
+  $scope.configureTask = function(funcDrawTaskNode){
+    var modal = $uibModal.open({
+      animation: true,
+      ariaLabelledBy: "modal-title-bottom",
+      ariaDescribedBy: "modal-body-bottom",
+      templateUrl: "configureTask.html",
+      size: "lg",
+      backdrop: "static",
+      scope: $scope,
+      controller: [
+        "$scope",
+        function($scope) {
+          $scope.closeModal = function() {
+            modal.close();
+          };
+
+          $scope.saveNode = function(){
+            if(funcDrawTaskNode){
+              funcDrawTaskNode();
+            }
+            $scope.$parent.streamName = $scope.streamName;
+            $scope.$parent.enginetype = $scope.enginetype;
+            $scope.$parent.stream_description = $scope.stream_description;
+            $scope.closeModal();
+          };
+        }
+      ]
+    });
+  };
+
+
+  $scope.configInput = function(funcDrawInputNode){
     var modal = $uibModal.open({
       animation: true,
       ariaLabelledBy: "modal-title-bottom",
@@ -107,12 +252,20 @@ angular.module('myApp.view1', ['ngRoute'])
           $scope.closeModal = function() {
             modal.close();
           };
+
+          $scope.saveNode = function(){
+            if(funcDrawInputNode){
+              funcDrawInputNode();
+            }
+
+            $scope.closeModal();
+          }
         }
       ]
     });
   };
 
-  $scope.configureLabel = function(){
+  $scope.configureLabel = function(funcDrawLabelNode){
     var modal = $uibModal.open({
       animation: true,
       ariaLabelledBy: "modal-title-bottom",
@@ -127,12 +280,20 @@ angular.module('myApp.view1', ['ngRoute'])
           $scope.closeModal = function() {
             modal.close();
           };
+
+          $scope.saveNode = function(){
+            if(funcDrawLabelNode){
+              funcDrawLabelNode();
+            }
+
+            $scope.closeModal();
+          };
         }
       ]
     });
   };
 
-  $scope.configureEvent = function(){
+  $scope.configureEvent = function (funcDrawEventlNode) {
     var modal = $uibModal.open({
       animation: true,
       ariaLabelledBy: "modal-title-bottom",
@@ -143,9 +304,58 @@ angular.module('myApp.view1', ['ngRoute'])
       scope: $scope,
       controller: [
         "$scope",
-        function($scope) {
-          $scope.closeModal = function() {
+        function ($scope) {
+          $scope.item = {
+            'name':null,
+            'select_expr':null,
+            'delim':null,
+            'filter_expr':null,
+            'interval':null,
+            'output':{
+              'uniqueKey':null,
+              'datasource':null,
+              'topic':null,
+              'codisKeyPrefix':null
+            }
+          };
+
+
+          $scope.closeModal = function () {
             modal.close();
+          };
+
+          $scope.saveNode = function () {
+            if (funcDrawEventlNode) {
+              funcDrawEventlNode();
+              $scope.$parent.task.events.push($scope.item);
+            }
+
+            $scope.closeModal();
+          };
+        }
+      ]
+    });
+  };
+
+  $scope.preview = function (funcDrawEventlNode) {
+    var modal = $uibModal.open({
+      animation: true,
+      ariaLabelledBy: "modal-title-bottom",
+      ariaDescribedBy: "modal-body-bottom",
+      templateUrl: "previewTaskDetails.html",
+      size: "lg",
+      backdrop: "static",
+      scope: $scope,
+      controller: [
+        "$scope",
+        function ($scope) {
+
+          $scope.closeModal = function () {
+            modal.close();
+          };
+
+          $scope.saveNode = function () {
+            $scope.closeModal();
           };
         }
       ]
@@ -154,6 +364,14 @@ angular.module('myApp.view1', ['ngRoute'])
 
 
 
+
+  $scope.getAllPossibleFields = function (fields, userFields) {
+    let resultStr = fields;
+    if (userFields !== undefined && userFields !== null) {
+      userFields.forEach((x) => { resultStr += "," + x.pname; });
+    }
+    return resultStr;
+  };
 
 
   var svg = d3.select('#canvas-container').append('svg')
@@ -249,8 +467,6 @@ angular.module('myApp.view1', ['ngRoute'])
 
   }
 
-
-
   function clickedOnGraphObj(graphObj){
     if(!$scope.startNodeId){
       $scope.startNodeId = graphObj.id;
@@ -269,9 +485,6 @@ angular.module('myApp.view1', ['ngRoute'])
       } else {
 
       }
-
-
-
 
       $scope.startNodeId = null;
       $scope.endNodeId = null;
@@ -337,9 +550,26 @@ angular.module('myApp.view1', ['ngRoute'])
     processorMap.set(newNode.id,newNode);
     if(currentNodeType === 'task'){
       console.log('task node');
+      $scope.configureTask(function(){
+        drawNode(svg,processorMap.get(newNode.id));
+      });
+    } else if(currentNodeType === 'input'){
+      $scope.configInput(function(){
+        drawNode(svg,processorMap.get(newNode.id));
+      });
+    } else if(currentNodeType ==='label') {
+      $scope.configureLabel(function(){
+        drawNode(svg,processorMap.get(newNode.id));
+      });
+    } else if(currentNodeType ==='event'){
+      $scope.configureEvent(function(){
+        drawNode(svg,processorMap.get(newNode.id));
+      });
+    } else {
+      drawNode(svg,processorMap.get(newNode.id));
     }
 
-    drawNode(svg,processorMap.get(newNode.id));
+
 
 
   }
@@ -420,7 +650,7 @@ angular.module('myApp.view1', ['ngRoute'])
           clickedOnGraphObj(nodeInfo);
         })
         .on('dblclick',function(){
-
+          $scope.configureTask();
         })
         .call(dragCircle)
         .append('text')
