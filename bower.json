@@ -13,6 +13,7 @@
     "html5-boilerplate": "^5.3.0",
     "d3": "^5.1.0",
     "jquery": "^3.3.1",
-    "angular-dragdrop": "^1.0.13"
+    "angular-dragdrop": "^1.0.13",
+    "bootstrap": "3"
   }
 }

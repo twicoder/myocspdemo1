@@ -1,6 +1,7 @@
-<div id="header">
-    <span>
-        <img id="first" src="../images/qq1.jpeg"
+<div class="row">
+    <div class="col-md-2 col-md-offset-10">
+        <span>
+            <img id="task" src="../images/task.png"
              width="50" height="50"
              data-drag="true"
              data-jqyoui-options="{revert: revertCard,
@@ -11,9 +12,9 @@
 						placeholder:true,
 						animate:true,
 						onStart: 'startCallback'}"/>
-    </span>
-    <span>
-        <img id="second" src="../images/qq2.jpeg"
+        </span>
+        <span>
+            <img id="input" src="../images/input.png"
              width="50" height="50"
              data-drag="true"
              data-jqyoui-options="{revert: revertCard,
@@ -24,9 +25,9 @@
 						placeholder:true,
 						animate:true,
 						onStart: 'startCallback'}"/>
-    </span>
-    <span>
-        <img id="third" src="../images/qq3.jpeg"
+        </span>
+        <span>
+            <img id="label" src="../images/label.png"
              width="50" height="50"
              data-drag="true"
              data-jqyoui-options="{revert: revertCard,
@@ -37,16 +38,32 @@
 						placeholder:true,
 						animate:true,
 						onStart: 'startCallback'}"/>
-    </span>
+        </span>
+        <span>
+            <img id="event" src="../images/event.png"
+                 width="50" height="50"
+                 data-drag="true"
+                 data-jqyoui-options="{revert: revertCard,
+							helper: 'clone',
+							appendTo: 'body',
+							zIndex: 350}"
+                 jqyoui-draggable="{index: 0,
+						placeholder:true,
+						animate:true,
+						onStart: 'startCallback'}"/>
+        </span>
+    </div>
+
 </div>
 
 
-<div id="canvas-container" style="background-color:#d3d1de" data-drop="true"
-     jqyoui-droppable="{multiple: true,
+<div class="row">
+    <div id="canvas-container" data-drop="true"
+         jqyoui-droppable="{multiple: true,
 						onDrop: 'dropCallback'}"
-     data-jqyoui-options="{hoverClass: 'ui-state-active',
+         data-jqyoui-options="{hoverClass: 'ui-state-active',
 							tolerance: 'pointer'}"></div>
-
+</div>
 
 
 <div id="banner-footer"></div>
